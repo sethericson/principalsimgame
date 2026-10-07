@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Play as the Principal</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --wood-dark: #3d2b1f;
+  --wood-mid: #5c3d2e;
+  --wood-light: #8b6347;
+  --wood-grain: #6b4c38;
+  --cream: #f5efe6;
+  --parchment: #e8dcc8;
+  --gold: #c9a84c;
+  --gold-light: #e8c96a;
+  --green-card: #1B5E20;
+  --red-card: #B71C1C;
+  --student-bar: #4CAF50;
+  --staff-bar: #2196F3;
+  --ink: #1a1108;
+  --shadow: rgba(0,0,0,0.5);
+}
+
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  background: #1a0f07;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--ink);
+}
+
+#root { width: 100%; height: 100%; }
+
+/* ===== PHASE 1 - SETUP ===== */
+#phase-setup {
+  width: 100%; height: 100%;
+  background: linear-gradient(135deg, #f0e8d5 0%, #e8dcc8 40%, #ddd0b8 100%);
+  display: flex; align-items: center; justify-content: center;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.district-form {
+  background: #faf6ef;
+  border: 3px double var(--gold);
+  border-radius: 4px;
+  padding: 40px;
+  max-width: 560px;
+  width: 100%;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.8);
+  position: relative;
+}
+
+.district-form::before {
+  content: '';
+  position: absolute; top: 6px; left: 6px; right: 6px; bottom: 6px;
+  border: 1px solid var(--gold);
+  pointer-events: none;
+}
+
+.form-header {
+  text-align: center;
+  margin-bottom: 32px;
+  border-bottom: 2px solid var(--gold);
+  padding-bottom: 20px;
+}
+
+.form-header .seal {
+  width: 64px; height: 64px;
+  background: radial-gradient(circle, var(--gold-light), var(--gold));
+  border-radius: 50%;
+  margin: 0 auto 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  border: 3px solid var(--wood-dark);
+}
+
+.form-header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px; font-weight: 900;
+  color: var(--wood-dark);
+  letter-spacing: 2px; text-transform: uppercase;
+}
+
+.form-header p {
+  font-size: 11px; color: #666; letter-spacing: 3px;
+  text-transform: uppercase; margin-top: 4px;
+}
+
+.form-field { margin-bottom: 20px; }
+
+.form-field label {
+  display: block;
+  font-size: 10px; font-weight: 600; letter-spacing: 2px;
+  text-transform: uppercase; color: #7a6040;
+  margin-bottom: 6px;
+}
+
+.form-field select, .form-field input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #c9a84c88;
+  border-radius: 3px;
+  background: #fffdf8;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-field select:focus, .form-field input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(201,168,76,0.15);
+}
+
+.swatch-row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.swatch {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 3px solid transparent;
+  transition: transform 0.15s, border-color 0.15s;
+  position: relative;
+}
+
+.swatch:hover { transform: scale(1.15); }
+.swatch.selected { border-color: var(--gold-light); box-shadow: 0 0 0 2px var(--gold); }
+
+.hair-swatch {
+  width: 36px; height: 28px;
+  border-radius: 6px;
+}
+
+.submit-btn {
+  width: 100%; padding: 14px;
+  background: linear-gradient(135deg, var(--wood-dark), var(--wood-mid));
+  color: var(--gold-light);
+  font-family: 'Playfair Display', serif;
+  font-size: 16px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  border: 2px solid var(--gold);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 8px;
+}
+
+.submit-btn:hover {
+  background: linear-gradient(135deg, var(--wood-mid), var(--wood-light));
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
+/* ===== OFFICE BACKGROUND ===== */
+#office-bg {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(180deg, #8b6347 0%, #7a5538 30%, #6b4732 60%, #5c3d2e 100%);
+  z-index: 0;
+  display: none;
+}
+
+/* Wood paneling lines */
+#office-bg::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(0,0,0,0.08) 60px, rgba(0,0,0,0.08) 62px);
+}
+
+.office-ceiling {
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 80px;
+  background: linear-gradient(180deg, #d4c4a0, #c4b088);
+}
+
+/* BOOKSHELF */
+.bookshelf {
+  position: absolute;
+  left: 20px; top: 80px;
+  width: 120px; height: 280px;
+  background: var(--wood-dark);
+  border: 2px solid #2a1a10;
+  border-radius: 2px;
+}
+
+.shelf-row {
+  position: absolute; left: 6px; right: 6px;
+  height: 4px; background: #2a1a10;
+}
+
+.book {
+  position: absolute;
+  bottom: 2px; width: 14px;
+  border-radius: 1px 1px 0 0;
+}
+
+/* WINDOW */
+.office-window {
+  position: absolute;
+  right: 60px; top: 90px;
+  width: 140px; height: 160px;
+  background: linear-gradient(180deg, #87CEEB 0%, #b8dff5 60%, #c8e8a0 100%);
+  border: 8px solid #4a3020;
+  border-radius: 2px;
+  box-shadow: inset 0 0 20px rgba(255,255,255,0.3);
+  overflow: hidden;
+}
+
+.window-muntin-h {
+  position: absolute; top: 50%; left: 0; right: 0;
+  height: 6px; background: #4a3020;
+  transform: translateY(-50%);
+}
+
+.window-muntin-v {
+  position: absolute; left: 50%; top: 0; bottom: 0;
+  width: 6px; background: #4a3020;
+  transform: translateX(-50%);
+}
+
+.window-school {
+  position: absolute; bottom: 8px; left: 10px; right: 10px;
+  height: 40px;
+  background: #e8e0c8;
+  border-radius: 2px;
+}
+
+/* DIPLOMAS */
+.diploma {
+  position: absolute;
+  background: #f5ede0;
+  border: 3px solid var(--gold);
+  border-radius: 2px;
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.4);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 7px; color: #5a3a20;
+  text-align: center; padding: 4px;
+  font-style: italic;
+}
+
+/* AMERICAN FLAG */
+.flag-pole {
+  position: absolute;
+  right: 220px; top: 60px;
+  width: 4px; height: 200px;
+  background: linear-gradient(180deg, #c0c0c0, #888);
+}
+
+.flag {
+  position: absolute;
+  right: 224px; top: 60px;
+  width: 80px; height: 50px;
+  overflow: hidden;
+}
+
+.flag-stripe { height: 100%; width: 100%; }
+
+/* DESK */
+.office-desk {
+  position: absolute;
+  bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 700px; height: 160px;
+  background: linear-gradient(180deg, #5c3520, #3d2010);
+  border-top: 6px solid #7a4828;
+  border-radius: 4px 4px 0 0;
+  box-shadow: 0 -8px 30px rgba(0,0,0,0.6);
+  z-index: 2;
+}
+
+.desk-top-surface {
+  position: absolute; top: 0; left: 0; right: 0; height: 20px;
+  background: linear-gradient(180deg, #8b5e38, #5c3d28);
+  border-radius: 4px 4px 0 0;
+}
+
+.desk-mat {
+  position: absolute; top: 15px; left: 60px; right: 60px; height: 90px;
+  background: linear-gradient(135deg, #1a3a1a, #1e4a1e);
+  border-radius: 4px;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);
+}
+
+.inbox-tray {
+  position: absolute; top: 10px; right: 80px;
+  width: 100px; height: 60px;
+  background: #2a1a08;
+  border: 2px solid #5a3820;
+  border-radius: 3px;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+}
+
+.inbox-label {
+  position: absolute; top: 4px; left: 50%; transform: translateX(-50%);
+  font-size: 8px; color: var(--gold); letter-spacing: 1px;
+  text-transform: uppercase; white-space: nowrap;
+}
+
+/* NAME PLATE */
+.nameplate {
+  position: absolute; bottom: 115px; left: 50%; transform: translateX(-50%);
+  background: linear-gradient(135deg, #c9a84c, #e8c96a, #c9a84c);
+  border: 2px solid #8a6020;
+  border-radius: 3px;
+  padding: 4px 16px;
+  font-family: 'Playfair Display', serif;
+  font-size: 13px; font-weight: 700;
+  color: var(--wood-dark);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  z-index: 10;
+  white-space: nowrap;
+}
+
+/* ===== APPROVAL BARS ===== */
+#approval-hud {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 100;
+  background: linear-gradient(180deg, rgba(20,10,5,0.95), rgba(20,10,5,0.8));
+  padding: 10px 24px;
+  display: flex; gap: 24px; align-items: center;
+  border-bottom: 2px solid var(--gold);
+  backdrop-filter: blur(4px);
+}
+
+.approval-label {
+  font-size: 11px; font-weight: 600; letter-spacing: 1px;
+  color: var(--gold-light); white-space: nowrap;
+  min-width: 120px;
+}
+
+.bar-track {
+  flex: 1; height: 20px;
+  background: #1a1a1a;
+  border-radius: 10px;
+  border: 1px solid #333;
+  overflow: hidden;
+  position: relative;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+}
+
+.bar-fill::after {
+  content: '';
+  position: absolute; top: 2px; left: 4px; right: 4px; height: 6px;
+  background: rgba(255,255,255,0.25);
+  border-radius: 3px;
+}
+
+.bar-pct {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  font-size: 11px; font-weight: 700; color: #fff; z-index: 1;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+}
+
+.emoji-floater {
+  position: fixed;
+  font-size: 20px;
+  pointer-events: none;
+  z-index: 200;
+  animation: floatUp 1.2s ease-out forwards;
+}
+
+@keyframes floatUp {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-80px) scale(1.4); }
+}
+
+/* ===== PHASE 2 - DECISIONS ===== */
+#phase-game {
+  position: fixed; inset: 0;
+  z-index: 1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding-top: 80px;
+}
+
+.question-counter {
+  position: fixed; top: 55px; right: 20px;
+  font-family: 'Playfair Display', serif;
+  font-size: 13px; color: var(--gold);
+  letter-spacing: 1px; z-index: 101;
+}
+
+/* DECISION CARD */
+.decision-card {
+  position: relative;
+  background: linear-gradient(135deg, #f8f2e4, #f0e8d0);
+  border: 2px solid var(--gold);
+  border-radius: 6px;
+  padding: 30px 32px;
+  max-width: 520px; width: 90%;
+  box-shadow: 4px 6px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.7);
+  transform: rotate(-0.5deg);
+  animation: cardSlideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 5;
+}
+
+@keyframes cardSlideUp {
+  0% { opacity: 0; transform: rotate(-0.5deg) translateY(40px) scale(0.95); }
+  100% { opacity: 1; transform: rotate(-0.5deg) translateY(0) scale(1); }
+}
+
+.card-stamp {
+  position: absolute; top: -12px; right: 16px;
+  background: var(--red-card);
+  color: white;
+  font-size: 9px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 2px;
+  transform: rotate(2deg);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+}
+
+.card-lines {
+  background: repeating-linear-gradient(transparent, transparent 27px, rgba(0,0,0,0.1) 27px, rgba(0,0,0,0.1) 28px);
+  padding: 4px 0;
+}
+
+.question-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px; font-weight: 700;
+  color: var(--ink);
+  line-height: 1.4; margin-bottom: 24px;
+}
+
+.options-row {
+  display: flex; flex-wrap: wrap; gap: 12px;
+  justify-content: center;
+}
+
+.option-btn {
+  padding: 12px 20px;
+  border-radius: 4px;
+  border: none; cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px; font-weight: 600;
+  transition: all 0.2s;
+  position: relative;
+  min-width: 160px;
+  transform: rotate(0.5deg);
+  box-shadow: 3px 4px 12px rgba(0,0,0,0.4);
+  text-align: center;
+}
+
+.option-btn.normal {
+  background: linear-gradient(135deg, #1B5E20, #2E7D32);
+  color: #e8f5e9;
+  border: 1px solid var(--gold);
+}
+
+.option-btn.chaotic {
+  background: linear-gradient(135deg, #B71C1C, #c62828);
+  color: #ffebee;
+  animation: chaoticPulse 2s ease-in-out infinite;
+}
+
+@keyframes chaoticPulse {
+  0%, 100% { box-shadow: 3px 4px 12px rgba(183,28,28,0.4); }
+  50% { box-shadow: 3px 4px 20px rgba(183,28,28,0.8), 0 0 15px rgba(255,50,50,0.3); }
+}
+
+.option-btn:hover {
+  transform: rotate(0.5deg) translateY(-3px);
+  box-shadow: 4px 8px 20px rgba(0,0,0,0.5);
+}
+
+.option-btn:active { transform: rotate(0.5deg) translateY(0); }
+
+/* UNIFORM PICKER */
+.uniform-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; margin-top: 16px;
+}
+
+.uniform-card {
+  padding: 12px;
+  background: linear-gradient(135deg, #2a4a2a, #1a3a1a);
+  border: 1px solid var(--gold);
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: center;
+  color: #e8f5e9;
+  font-size: 13px; font-weight: 600;
+  transition: all 0.2s;
+  box-shadow: 2px 3px 8px rgba(0,0,0,0.4);
+}
+
+.uniform-card:hover { transform: translateY(-2px); background: linear-gradient(135deg, #3a5a3a, #2a4a2a); }
+
+/* ===== REACTION PANEL ===== */
+#reaction-panel {
+  position: fixed; bottom: 180px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 16px;
+  z-index: 50;
+  animation: reactionIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+}
+
+@keyframes reactionIn {
+  0% { opacity: 0; transform: translateX(-50%) scale(0.8); }
+  100% { opacity: 1; transform: translateX(-50%) scale(1); }
+}
+
+.reaction-bubble {
+  background: rgba(250,245,235,0.97);
+  border: 2px solid var(--gold);
+  border-radius: 12px;
+  padding: 12px 16px;
+  max-width: 200px;
+  box-shadow: 3px 4px 16px rgba(0,0,0,0.4);
+  position: relative;
+}
+
+.reaction-avatar { font-size: 22px; display: block; margin-bottom: 4px; }
+.reaction-label { font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #888; }
+.reaction-text { font-size: 13px; color: var(--ink); margin-top: 2px; font-style: italic; }
+
+/* ===== LOADING ===== */
+.loading-memo {
+  background: linear-gradient(135deg, #faf6ef, #f0ead8);
+  border: 2px solid var(--gold);
+  border-radius: 4px;
+  padding: 30px 40px;
+  text-align: center;
+  box-shadow: 4px 6px 20px rgba(0,0,0,0.4);
+  max-width: 320px;
+  animation: memoFloat 1.5s ease-in-out infinite;
+}
+
+@keyframes memoFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.loading-memo .spinner { font-size: 32px; animation: spin 1.5s linear infinite; display: block; margin-bottom: 12px; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.loading-memo p { font-family: 'Playfair Display', serif; font-size: 16px; color: var(--wood-dark); }
+.loading-memo small { font-size: 11px; color: #888; display: block; margin-top: 6px; letter-spacing: 1px; }
+
+/* ===== PHASE 3 - STUDENT IN OFFICE ===== */
+#phase-student {
+  position: fixed; inset: 0; z-index: 5;
+  display: flex; padding-top: 60px;
+}
+
+.student-scene-left {
+  flex: 1.5; display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+
+.student-scene-right {
+  flex: 1; display: flex; align-items: flex-end; justify-content: center;
+  padding: 20px; padding-bottom: 160px;
+  gap: 8px; position: relative;
+}
+
+.student-name-tag {
+  position: absolute; bottom: 140px; left: 50%; transform: translateX(-50%);
+  background: var(--gold); color: var(--wood-dark);
+  font-family: 'Playfair Display', serif; font-weight: 700; font-size: 13px;
+  padding: 4px 16px; border-radius: 3px; white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+/* ===== PHASE 4 - END SCREEN ===== */
+#phase-end {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(10,5,2,0.9);
+  display: flex; align-items: center; justify-content: center;
+  overflow-y: auto; padding: 20px;
+}
+
+.report-card {
+  background: linear-gradient(135deg, #faf6ef, #f0ead8);
+  border: 4px double var(--gold);
+  border-radius: 6px;
+  padding: 40px;
+  max-width: 560px; width: 100%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  position: relative;
+  animation: cardSlideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.report-card::before {
+  content: '';
+  position: absolute; top: 8px; left: 8px; right: 8px; bottom: 8px;
+  border: 1px solid rgba(201,168,76,0.4);
+  pointer-events: none;
+}
+
+.report-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px; font-weight: 900;
+  text-align: center; color: var(--wood-dark);
+  text-transform: uppercase; letter-spacing: 3px;
+  margin-bottom: 6px;
+}
+
+.report-subtitle {
+  text-align: center; font-size: 11px; color: #888;
+  letter-spacing: 3px; text-transform: uppercase; margin-bottom: 28px;
+}
+
+.report-row {
+  display: flex; justify-content: space-between;
+  align-items: center; padding: 8px 0;
+  border-bottom: 1px dotted rgba(0,0,0,0.15);
+}
+
+.report-row span:first-child { font-size: 12px; color: #7a6040; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+.report-row span:last-child { font-size: 15px; font-weight: 700; color: var(--ink); }
+
+.legacy-tier {
+  text-align: center; margin: 24px 0 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, var(--wood-dark), var(--wood-mid));
+  border-radius: 4px;
+  border: 2px solid var(--gold);
+}
+
+.legacy-tier-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px; font-weight: 700;
+  color: var(--gold-light);
+}
+
+.legacy-quote {
+  font-style: italic; font-size: 14px; color: #5a4030;
+  text-align: center; margin: 16px 0;
+  padding: 12px; border-left: 3px solid var(--gold);
+  background: rgba(201,168,76,0.05);
+}
+
+.play-again-btn {
+  width: 100%; padding: 16px;
+  background: linear-gradient(135deg, var(--wood-dark), var(--wood-mid));
+  color: var(--gold-light);
+  font-family: 'Playfair Display', serif;
+  font-size: 16px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; border: 2px solid var(--gold);
+  border-radius: 3px; cursor: pointer; margin-top: 20px;
+  transition: all 0.2s;
+}
+
+.play-again-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
+
+/* PRINCIPAL AVATAR behind desk */
+.principal-avatar-wrapper {
+  position: absolute; bottom: 155px; left: 50%; transform: translateX(-50%);
+  z-index: 3;
+}
+
+/* Hidden */
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- ====================== OFFICE BACKGROUND ====================== -->
+<div id="office-bg">
+  <div class="office-ceiling"></div>
+
+  <!-- Bookshelf -->
+  <div class="bookshelf">
+    <div class="shelf-row" style="bottom:88px"></div>
+    <div class="shelf-row" style="bottom:176px"></div>
+    <!-- Books row 1 -->
+    <div class="book" style="left:8px; height:82px; background:#8b1a1a;"></div>
+    <div class="book" style="left:24px; height:76px; background:#1a5a8b;"></div>
+    <div class="book" style="left:40px; height:80px; background:#1a6b3a;"></div>
+    <div class="book" style="left:56px; height:74px; background:#7a5a1a;"></div>
+    <div class="book" style="left:72px; height:78px; background:#5a1a7a;"></div>
+    <div class="book" style="left:88px; height:72px; background:#8b4a1a;"></div>
+    <div class="book" style="left:100px; height:80px; background:#1a4a6b;"></div>
+    <!-- Books row 2 -->
+    <div class="book" style="left:8px; bottom:92px; height:76px; background:#3a7a3a;"></div>
+    <div class="book" style="left:22px; bottom:92px; height:82px; background:#7a2a2a;"></div>
+    <div class="book" style="left:38px; bottom:92px; height:70px; background:#2a2a7a;"></div>
+    <div class="book" style="left:52px; bottom:92px; height:78px; background:#6a4a2a;"></div>
+    <div class="book" style="left:68px; bottom:92px; height:74px; background:#2a6a6a;"></div>
+    <div class="book" style="left:82px; bottom:92px; height:80px; background:#7a7a2a;"></div>
+    <div class="book" style="left:98px; bottom:92px; height:72px; background:#4a2a6a;"></div>
+    <!-- Books row 3 -->
+    <div class="book" style="left:8px; bottom:180px; height:78px; background:#2a5a2a;"></div>
+    <div class="book" style="left:24px; bottom:180px; height:74px; background:#6a1a1a;"></div>
+    <div class="book" style="left:40px; bottom:180px; height:80px; background:#1a3a6a;"></div>
+    <div class="book" style="left:56px; bottom:180px; height:72px; background:#5a4a1a;"></div>
+    <div class="book" style="left:70px; bottom:180px; height:76px; background:#3a1a5a;"></div>
+    <div class="book" style="left:86px; bottom:180px; height:70px; background:#6a3a1a;"></div>
+    <div class="book" style="left:100px; bottom:180px; height:78px; background:#1a5a4a;"></div>
+  </div>
+
+  <!-- Diplomas -->
+  <div class="diploma" style="left:165px; top:100px; width:90px; height:70px; transform:rotate(-1deg);">
+    DIPLOMA<br>OF<br>EXCELLENCE
+  </div>
+  <div class="diploma" style="left:170px; top:185px; width:80px; height:60px; transform:rotate(1.5deg);">
+    CERTIFICATE<br>OF<br>ACHIEVEMENT
+  </div>
+
+  <!-- American Flag -->
+  <div class="flag-pole"></div>
+  <svg class="flag" viewBox="0 0 80 50" xmlns="http://www.w3.org/2000/svg">
+    <rect width="80" height="50" fill="#BF0A30"/>
+    <rect y="3.8" width="80" height="3.8" fill="white"/>
+    <rect y="7.6" width="80" height="3.8" fill="#BF0A30"/>
+    <rect y="11.4" width="80" height="3.8" fill="white"/>
+    <rect y="15.2" width="80" height="3.8" fill="#BF0A30"/>
+    <rect y="19" width="80" height="3.8" fill="white"/>
+    <rect y="22.8" width="80" height="3.8" fill="#BF0A30"/>
+    <rect y="26.6" width="80" height="3.8" fill="white"/>
+    <rect y="30.4" width="80" height="3.8" fill="#BF0A30"/>
+    <rect y="34.2" width="80" height="3.8" fill="white"/>
+    <rect y="38" width="80" height="3.8" fill="#BF0A30"/>
+    <rect y="41.8" width="80" height="3.8" fill="white"/>
+    <rect y="45.6" width="80" height="3.8" fill="#BF0A30"/>
+    <rect width="32" height="26.6" fill="#002868"/>
+  </svg>
+
+  <!-- Window -->
+  <div class="office-window">
+    <div class="window-muntin-h"></div>
+    <div class="window-muntin-v"></div>
+    <div class="window-school">
+      <div style="position:absolute; bottom:0; left:10px; width:20px; height:30px; background:#c8c0a0; border-radius:1px;"></div>
+      <div style="position:absolute; bottom:0; left:34px; width:30px; height:38px; background:#d0c8a8; border-radius:1px;"></div>
+    </div>
+  </div>
+
+  <!-- Desk -->
+  <div class="office-desk">
+    <div class="desk-top-surface"></div>
+    <div class="desk-mat"></div>
+    <div class="inbox-tray">
+      <div class="inbox-label">INBOX</div>
+    </div>
+  </div>
+
+  <!-- Warm overlay -->
+  <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(180,120,40,0.06),rgba(100,60,20,0.12));pointer-events:none;"></div>
+</div>
+
+<!-- ====================== HUD ====================== -->
+<div id="approval-hud" class="hidden">
+  <div class="approval-label">😊 Students</div>
+  <div class="bar-track">
+    <div class="bar-fill" id="student-bar" style="width:20%;background:var(--student-bar);">
+      <span class="bar-pct" id="student-pct">20%</span>
+    </div>
+  </div>
+  <div class="approval-label" style="text-align:right;">👔 Faculty & Staff</div>
+  <div class="bar-track">
+    <div class="bar-fill" id="staff-bar" style="width:50%;background:var(--staff-bar);">
+      <span class="bar-pct" id="staff-pct">50%</span>
+    </div>
+  </div>
+</div>
+
+<div id="question-counter-display" class="question-counter hidden"></div>
+
+<!-- ====================== REACTION PANEL ====================== -->
+<div id="reaction-panel" class="hidden">
+  <div class="reaction-bubble">
+    <span class="reaction-avatar">🧒</span>
+    <span class="reaction-label">Students say</span>
+    <div class="reaction-text" id="student-reaction-text"></div>
+  </div>
+  <div class="reaction-bubble">
+    <span class="reaction-avatar">👔</span>
+    <span class="reaction-label">Staff says</span>
+    <div class="reaction-text" id="staff-reaction-text"></div>
+  </div>
+</div>
+
+<!-- ====================== PHASE 1: SETUP ====================== -->
+<div id="phase-setup">
+  <div class="district-form">
+    <div class="form-header">
+      <div class="seal">🏫</div>
+      <h1>Principal Intake Form</h1>
+      <p>District HR Department • Form 47-B</p>
+    </div>
+
+    <div style="display:flex;gap:12px;">
+      <div class="form-field" style="flex:0 0 120px;">
+        <label>Title</label>
+        <select id="title-select">
+          <option>Mr.</option>
+          <option>Mrs.</option>
+          <option>Ms.</option>
+          <option>Dr.</option>
+        </select>
+      </div>
+      <div class="form-field" style="flex:1;">
+        <label>Last Name</label>
+        <input type="text" id="lastname-input" placeholder="e.g. Henderson" maxlength="30">
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label>School Name</label>
+      <input type="text" id="school-input" placeholder="e.g. Westbrook Middle School" maxlength="40">
+    </div>
+
+    <div class="form-field">
+      <label>Skin Tone</label>
+      <div class="swatch-row" id="skin-swatches">
+        <div class="swatch selected" data-color="#FDDBB4" style="background:#FDDBB4"></div>
+        <div class="swatch" data-color="#C68642" style="background:#C68642"></div>
+        <div class="swatch" data-color="#8D5524" style="background:#8D5524"></div>
+        <div class="swatch" data-color="#4A2912" style="background:#4A2912"></div>
+        <div class="swatch" data-color="#2C1A0E" style="background:#2C1A0E"></div>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label>Hair Color</label>
+      <div class="swatch-row" id="hair-swatches">
+        <div class="swatch hair-swatch selected" data-color="#1a1a1a" style="background:#1a1a1a;border-radius:6px;width:36px;height:28px;"></div>
+        <div class="swatch hair-swatch" data-color="#3b1f0d" style="background:#3b1f0d;border-radius:6px;width:36px;height:28px;"></div>
+        <div class="swatch hair-swatch" data-color="#8B5E3C" style="background:#8B5E3C;border-radius:6px;width:36px;height:28px;"></div>
+        <div class="swatch hair-swatch" data-color="#D4A017" style="background:#D4A017;border-radius:6px;width:36px;height:28px;"></div>
+        <div class="swatch hair-swatch" data-color="#A0522D" style="background:#A0522D;border-radius:6px;width:36px;height:28px;"></div>
+        <div class="swatch hair-swatch" data-color="#9E9E9E" style="background:#9E9E9E;border-radius:6px;width:36px;height:28px;"></div>
+      </div>
+    </div>
+
+    <div onclick="startGame()" class="submit-btn" style="text-align:center;">
+      Begin Your Tenure →
+    </div>
+  </div>
+</div>
+
+<!-- ====================== PHASE 2: GAME ====================== -->
+<div id="phase-game" class="hidden">
+  <div id="game-card-area"></div>
+  <div id="principal-avatar-area" class="principal-avatar-wrapper"></div>
+  <div id="nameplate-area" class="nameplate hidden"></div>
+</div>
+
+<!-- ====================== PHASE 3: STUDENT ====================== -->
+<div id="phase-student" class="hidden">
+  <div class="student-scene-left" id="student-decision-area"></div>
+  <div class="student-scene-right" id="student-svg-area">
+    <div class="student-name-tag" id="student-name-tag"></div>
+  </div>
+</div>
+
+<!-- ====================== PHASE 4: END ====================== -->
+<div id="phase-end" class="hidden">
+  <div class="report-card" id="report-card-content"></div>
+</div>
+
+<!-- ===================== THREE.JS 3D SCENE (Gemini, fixed) ===================== -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+window.ThreeDScene = (function() {
+  let renderer, scene, camera;
+  let principalGroup, desk, studentGroup;
+  let animFrameId = null;          // tracked so destroyScene can cancel the loop
+  let approvalLeanTarget = 0;      // target Z rotation, lerped inside animate()
+
+  // ── Utility: CSS hex string ("#FDDBB4") → Three.js integer (0xFDDBB4) ──
+  // MeshStandardMaterial.color rejects strings; it needs a number or THREE.Color.
+  function cssToHex(cssStr) {
+    if (typeof cssStr === 'number') return cssStr;      // already a number, pass through
+    const clean = String(cssStr).replace('#', '');
+    const n = parseInt(clean, 16);
+    return isNaN(n) ? 0xffffff : n;
+  }
+
+  function initScene() {
+    // Guard: if a canvas already exists from a previous session, remove it first
+    const old = document.getElementById('three-canvas');
+    if (old) old.remove();
+
+    const container = document.getElementById('office-bg');
+    const canvas = document.createElement('canvas');
+    canvas.id = 'three-canvas';
+    canvas.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;pointer-events:none;';
+    container.appendChild(canvas);
+
+    renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // cap at 2x for perf
+
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 1.5, 5);
+    camera.lookAt(0, 0.5, 0);
+
+    // Lighting (hex literal was broken in Gemini's original as `0 switchffe4b0`)
+    const ambientLight = new THREE.AmbientLight(0xfff8e8, 0.6);
+    scene.add(ambientLight);
+
+    const dirLight = new THREE.DirectionalLight(0xffe4b0, 0.8);
+    dirLight.position.set(2, 4, 3);
+    scene.add(dirLight);
+
+    // Desk — sits at y=0..1, surface at y=1
+    const deskGeo = new THREE.BoxGeometry(3, 1, 1.5);
+    const deskMat = new THREE.MeshStandardMaterial({ color: 0x3d2010 });
+    desk = new THREE.Mesh(deskGeo, deskMat);
+    desk.position.set(0, 0.5, 0);
+    scene.add(desk);
+
+    principalGroup = new THREE.Group();
+    scene.add(principalGroup);
+
+    studentGroup = new THREE.Group();
+    scene.add(studentGroup);
+
+    approvalLeanTarget = 0;
+
+    window.addEventListener('resize', onWindowResize);
+    // Cancel any stale loop from a previous session before starting a new one
+    if (animFrameId !== null) cancelAnimationFrame(animFrameId);
+    animate();
+  }
+
+  function onWindowResize() {
+    if (!camera || !renderer) return;
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+
+  function renderPrincipal(skinColor, hairColor) {
+    if (!principalGroup) return;
+    // Clear previous meshes and dispose geometry/material to avoid leaks
+    while (principalGroup.children.length > 0) {
+      const child = principalGroup.children[0];
+      if (child.geometry) child.geometry.dispose();
+      if (child.material) child.material.dispose();
+      principalGroup.remove(child);
+    }
+
+    // FIX: convert CSS hex strings to integer — MeshStandardMaterial requires numbers
+    const skinInt = cssToHex(skinColor);
+    const hairInt = cssToHex(hairColor);
+
+    // Head (SphereGeometry — CapsuleGeometry is not in r128)
+    const headGeo = new THREE.SphereGeometry(0.4, 32, 32);
+    const head = new THREE.Mesh(headGeo, new THREE.MeshStandardMaterial({ color: skinInt }));
+    head.position.set(0, 1.1, -0.5);
+    principalGroup.add(head);
+
+    // Hair — upper hemisphere only (phiStart=0, phiLength=π covers top half)
+    const hairGeo = new THREE.SphereGeometry(0.42, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2);
+    const hair = new THREE.Mesh(hairGeo, new THREE.MeshStandardMaterial({ color: hairInt }));
+    hair.position.set(0, 1.1, -0.5);
+    hair.rotation.x = -0.2;
+    principalGroup.add(hair);
+
+    // Body / blazer (behind desk, only upper body visible above desk surface)
+    const bodyGeo = new THREE.BoxGeometry(0.9, 1, 0.5);
+    const body = new THREE.Mesh(bodyGeo, new THREE.MeshStandardMaterial({ color: 0x1a1a1a }));
+    body.position.set(0, 0.4, -0.6);
+    principalGroup.add(body);
+  }
+
+  function renderStudentLineup(students) {
+    if (!studentGroup) return;
+    // Dispose old meshes before clearing
+    studentGroup.children.slice().forEach(group => {
+      group.children.forEach(child => {
+        if (child.geometry) child.geometry.dispose();
+        if (child.material) child.material.dispose();
+      });
+      studentGroup.remove(group);
+    });
+
+    if (!students || !students.length) return;
+
+    const uniformColor = getUniformColor();
+
+    students.forEach((s, i) => {
+      const student = new THREE.Group();
+
+      // Dimensions by body type
+      let h = 1.2, w = 0.7;
+      if      (s.bodyType === 'skinny') { h = 1.4; w = 0.5; }
+      else if (s.bodyType === 'fat')    { h = 1.1; w = 0.9; }
+      else if (s.bodyType === 'obese')  { h = 1.0; w = 1.1; }
+
+      // Body block
+      const bGeo = new THREE.BoxGeometry(w, h, 0.4);
+      const body = new THREE.Mesh(bGeo, new THREE.MeshStandardMaterial({ color: uniformColor }));
+      body.position.y = h / 2;
+      student.add(body);
+
+      // Head — FIX: s.skinColor arrives as CSS string, must convert
+      const hGeo = new THREE.SphereGeometry(0.25, 20, 20);
+      const head = new THREE.Mesh(hGeo, new THREE.MeshStandardMaterial({ color: cssToHex(s.skinColor) }));
+      head.position.y = h + 0.28;
+      student.add(head);
+
+      // Fan arrangement on right side of scene
+      const angle = (i - 2) * 0.4;
+      student.position.set(Math.sin(angle) * 2.5 + 1.5, 0, Math.cos(angle) * 0.5 - 1);
+      student.rotation.y = -angle - Math.PI / 4;
+      studentGroup.add(student);
+    });
+  }
+
+  function getUniformColor() {
+    const uniformColors = {
+      'Traditional Uniform':  0x223366,
+      'Preppy Polos':         0x1a5a8b,
+      'Smart Casual':         0x8b5a1a,
+      'Suit and Tie':         0x1a1a2a,
+      'Business Formal':      0x2a2a3a,
+      'All-Black Everything': 0x111111,
+      'Hawaiian Shirts':      0xc83070,
+      'Pajamas':              0xb05090,
+      'Camo Gear':            0x4a5a3a,
+      'Bathing Suits':        0x1a90d0,
+      'Normal Clothes':       0x3a6aaa
+    };
+    const ut = window.gameState && window.gameState.uniformType;
+    return (ut && uniformColors[ut] !== undefined) ? uniformColors[ut] : 0x555555;
+  }
+
+  // Called by game logic after each bar update.
+  // FIX: only sets the TARGET — the actual lerp runs per-frame inside animate().
+  function updateApprovalViz(studentPct, staffPct) {
+    approvalLeanTarget = (studentPct - staffPct) / 200;
+  }
+
+  function destroyScene() {
+    // Cancel the rAF loop first — prevents a stale loop running after reset
+    if (animFrameId !== null) {
+      cancelAnimationFrame(animFrameId);
+      animFrameId = null;
+    }
+    window.removeEventListener('resize', onWindowResize);
+    if (renderer) {
+      renderer.dispose();
+      renderer = null;
+    }
+    // Null out references so animate()'s guard check doesn't render a dead scene
+    scene = null;
+    camera = null;
+    principalGroup = null;
+    studentGroup = null;
+    const canvas = document.getElementById('three-canvas');
+    if (canvas) canvas.remove();
+  }
+
+  function animate() {
+    animFrameId = requestAnimationFrame(animate);
+    if (!renderer || !scene || !camera) return;
+
+    // FIX: lerp the principal lean here, once per frame, so it actually animates
+    if (principalGroup) {
+      principalGroup.rotation.z += (approvalLeanTarget - principalGroup.rotation.z) * 0.05;
+    }
+
+    renderer.render(scene, camera);
+  }
+
+  return { initScene, renderPrincipal, renderStudentLineup, updateApprovalViz, destroyScene };
+})();
+</script>
+<!-- ===================== END THREE.JS 3D SCENE ===================== -->
+
+<script>
+// ============================================================
+// GAME STATE  (also exposed as window.gameState for Three.js)
+// ============================================================
+const state = {
+  title: 'Mr.', lastName: '', schoolName: '',
+  skinColor: '#FDDBB4', hairColor: '#1a1a1a',
+  studentApproval: 20, staffApproval: 50,
+  uniformType: 'Normal Clothes', phonesAllowed: true,
+  questions: [], currentQuestion: 0,
+  totalQuestions: 12, phase: 'setup',
+  decisions: []
+};
+// Shared reference so Three.js getUniformColor() can read state without circular deps
+window.gameState = state;
+
+// ============================================================
+// FALLBACK DATA
+// ============================================================
+const FALLBACK_QUESTIONS = [
+  // Both options funny
+  { question: "The cafeteria has run out of food. What do you serve for lunch?", options: [
+    { text: "Vending machine contents only — students build their own meal", type: "chaotic", studentReaction: "I made a five-course meal out of Doritos, gummy bears, and a granola bar.", staffReaction: "A child just ate $14 in quarters. I'm calling someone.", studentImpact: 10, staffImpact: -8 },
+    { text: "Whatever is left in the teachers' lounge fridge — no exceptions", type: "chaotic", studentReaction: "I just ate Mr. Patterson's leftover salmon. I feel powerful and terrible.", staffReaction: "That was my anniversary dinner. I'm going home.", studentImpact: 7, staffImpact: -14 }
+  ]},
+  { question: "A student falls asleep in class. What is the policy?", options: [
+    { text: "Wake them gently and send a note home", type: "normal", studentReaction: "Honestly fair. I should sleep more.", staffReaction: "A proportionate response that maintains classroom decorum.", studentImpact: 2, staffImpact: 6 },
+    { text: "Let them sleep — class continues around them like a sleeping king", type: "chaotic", studentReaction: "Brandon has been asleep for 3 days. We dare not disturb him.", staffReaction: "I taught an entire unit on the Civil War around a snoring 7th grader.", studentImpact: 12, staffImpact: -9 }
+  ]},
+  // Both options funny
+  { question: "Should homework be assigned on weekends?", options: [
+    { text: "Only if teachers also do homework on weekends and share it Monday", type: "chaotic", studentReaction: "Mr. Davis turned in a 4-page essay on his feelings about traffic. A+.", staffReaction: "I did not get a Master's degree for this.", studentImpact: 13, staffImpact: -12 },
+    { text: "Homework is replaced with journaling about your 'emotional truth'", type: "chaotic", studentReaction: "I wrote 900 words about how much I hate math. Got extra credit.", staffReaction: "The school counselor is overwhelmed. We're all overwhelmed.", studentImpact: 11, staffImpact: -10 }
+  ]},
+  { question: "How many hall passes should students get per day?", options: [
+    { text: "3 passes per day, tracked digitally", type: "normal", studentReaction: "I have to strategize now. This is chess.", staffReaction: "Finally, a system with some accountability.", studentImpact: 1, staffImpact: 7 },
+    { text: "Unlimited passes, but each one must be presented as a dramatic monologue", type: "chaotic", studentReaction: "I performed a 2-minute soliloquy about needing to use the bathroom. Standing ovation.", staffReaction: "I have seen things that cannot be unseen.", studentImpact: 14, staffImpact: -7 }
+  ]},
+  { question: "What should the school mascot be?", options: [
+    { text: "Eagles — timeless, respected, easy to draw on merchandise", type: "normal", studentReaction: "Fine. It's fine. Eagles are fine.", staffReaction: "A dignified choice that reflects institutional gravitas.", studentImpact: 2, staffImpact: 5 },
+    { text: "The Sentient Stapler — 'We bind together'", type: "chaotic", studentReaction: "I would die for the Sentient Stapler.", staffReaction: "The merchandise budget has been spent on stapler costumes.", studentImpact: 15, staffImpact: -11 }
+  ]},
+  // Both options funny
+  { question: "The school song needs to be updated. What direction do you go?", options: [
+    { text: "Commission a local rapper to write a hype anthem about academic excellence", type: "chaotic", studentReaction: "WE LITERALLY PERFORMED IT AT THE STATE BOARD MEETING.", staffReaction: "The lyrics referenced the quadratic formula. Twice. Over a beat.", studentImpact: 14, staffImpact: -6 },
+    { text: "The school song is now just the students humming the theme from Jeopardy!", type: "chaotic", studentReaction: "We hum it during tests. It actually helps.", staffReaction: "I have heard this hum in my sleep for three weeks.", studentImpact: 11, staffImpact: -9 }
+  ]},
+  { question: "What happens when a student is caught using their phone in class?", options: [
+    { text: "Phone is held until end of day — one warning first", type: "normal", studentReaction: "Annoying but survivable. I can do this.", staffReaction: "Clear, enforceable, and reasonable. Thank you.", studentImpact: -2, staffImpact: 8 },
+    { text: "The teacher must answer the phone and have a full conversation with whoever is calling", type: "chaotic", studentReaction: "Mrs. Chen just had a 10-minute call with my mom about my weekend plans.", staffReaction: "I learned more about this child's family in one call than all year.", studentImpact: 12, staffImpact: -5 }
+  ]},
+  { question: "How should parent-teacher conferences be scheduled?", options: [
+    { text: "Standard online booking — 15-minute slots, evenings", type: "normal", studentReaction: "The calendar link works. This is fine.", staffReaction: "Efficient and professional. I appreciate this.", studentImpact: 1, staffImpact: 6 },
+    { text: "Parents must challenge the teacher to their choice of board game — winner sets the grade", type: "chaotic", studentReaction: "My dad hustled Mrs. Peterson at Connect Four. I have an A now.", staffReaction: "I lost Scrabble to a hedge fund manager and had to give his kid an A in English.", studentImpact: 10, staffImpact: -13 }
+  ]},
+  { question: "Should teachers be allowed to give surprise pop quizzes?", options: [
+    { text: "Only with 24-hour notice — students deserve fair warning", type: "normal", studentReaction: "At least I have warning. I can do something with this.", staffReaction: "A fair compromise between rigor and student wellbeing.", studentImpact: 4, staffImpact: 6 },
+    { text: "Pop quizzes are banned, replaced with 'Vibe Checks' — you either pass or you don't", type: "chaotic", studentReaction: "I don't know what a Vibe Check measures but I got a 97.", staffReaction: "I have a PhD. I am administering Vibe Checks.", studentImpact: 13, staffImpact: -12 }
+  ]},
+  { question: "What should detention look like?", options: [
+    { text: "Quiet study hall, 45 minutes after school", type: "normal", studentReaction: "Annoying but I'll live.", staffReaction: "A measured and educational consequence. Well done.", studentImpact: -2, staffImpact: 5 },
+    { text: "Students must knit something for a local charity — no exceptions", type: "chaotic", studentReaction: "I hate it here but Grandma got a beautiful scarf.", staffReaction: "The detention room is now producing more scarves than a textile factory.", studentImpact: 8, staffImpact: -4 }
+  ]}
+];
+
+const FALLBACK_STUDENT = {
+  studentName: "Cornelius Magnifico Belch",
+  situation: "Cornelius was caught replacing all the hand sanitizer dispensers in the school with ranch dressing. He claims it was a 'flavor experiment' and that his hands are 'delicious.'",
+  options: [
+    { text: "3-day suspension and a strongly-worded letter", type: "normal", studentReaction: "Worth it. Totally worth it.", staffReaction: "A proportionate response to ranch-based malfeasance.", studentImpact: -5, staffImpact: 8 },
+    { text: "Make him the Official School Ranch Taste Tester", type: "chaotic", studentReaction: "THIS IS THE GREATEST DAY OF MY LIFE!", staffReaction: "I just lathered my hands in Hidden Valley. I quit.", studentImpact: 13, staffImpact: -14 }
+  ]
+};
+
+// ============================================================
+// SETUP SCREEN INTERACTIONS
+// ============================================================
+document.querySelectorAll('#skin-swatches .swatch').forEach(sw => {
+  sw.onclick = () => {
+    document.querySelectorAll('#skin-swatches .swatch').forEach(s => s.classList.remove('selected'));
+    sw.classList.add('selected');
+    state.skinColor = sw.dataset.color;
+  };
+});
+
+document.querySelectorAll('#hair-swatches .swatch').forEach(sw => {
+  sw.onclick = () => {
+    document.querySelectorAll('#hair-swatches .swatch').forEach(s => s.classList.remove('selected'));
+    sw.classList.add('selected');
+    state.hairColor = sw.dataset.color;
+  };
+});
+
+// ============================================================
+// START GAME
+// ============================================================
+function startGame() {
+  const ln = document.getElementById('lastname-input').value.trim();
+  const sn = document.getElementById('school-input').value.trim();
+  if (!ln) { alert('Please enter your last name.'); return; }
+  if (!sn) { alert('Please enter your school name.'); return; }
+
+  state.lastName = ln;
+  state.schoolName = sn;
+  state.title = document.getElementById('title-select').value;
+  state.phase = 'decisions';
+
+  document.getElementById('phase-setup').classList.add('hidden');
+  document.getElementById('office-bg').style.display = 'block';
+  document.getElementById('approval-hud').classList.remove('hidden');
+  document.getElementById('question-counter-display').classList.remove('hidden');
+  document.getElementById('phase-game').classList.remove('hidden');
+
+  // Nameplate
+  const np = document.getElementById('nameplate-area');
+  np.textContent = `${state.title} ${state.lastName} — ${state.schoolName}`;
+  np.classList.remove('hidden');
+
+  // Principal avatar (SVG fallback)
+  renderPrincipalAvatar();
+
+  // ── Three.js: boot scene then render 3-D principal ──
+  if (window.ThreeDScene) {
+    window.ThreeDScene.initScene();
+    window.ThreeDScene.renderPrincipal(state.skinColor, state.hairColor);
+  }
+
+  updateBars(false);
+  showQuestion1();
+}
+
+// ============================================================
+// PRINCIPAL SVG AVATAR
+// ============================================================
+function renderPrincipalAvatar() {
+  const area = document.getElementById('principal-avatar-area');
+  const sc = state.skinColor;
+  const hc = state.hairColor;
+  area.innerHTML = `
+    <svg width="80" height="110" viewBox="0 0 80 110" xmlns="http://www.w3.org/2000/svg">
+      <!-- Suit body -->
+      <rect x="10" y="65" width="60" height="45" rx="6" fill="#1a2a3a"/>
+      <!-- Shirt collar -->
+      <rect x="28" y="62" width="24" height="18" rx="2" fill="#f0f0f0"/>
+      <!-- Tie -->
+      <polygon points="40,64 36,80 40,85 44,80" fill="#8b1a1a"/>
+      <!-- Lapels -->
+      <polygon points="28,62 20,75 32,72" fill="#0d1e2d"/>
+      <polygon points="52,62 60,75 48,72" fill="#0d1e2d"/>
+      <!-- Neck -->
+      <rect x="33" y="52" width="14" height="14" rx="4" fill="${sc}"/>
+      <!-- Head -->
+      <ellipse cx="40" cy="38" rx="22" ry="24" fill="${sc}"/>
+      <!-- Hair -->
+      <ellipse cx="40" cy="18" rx="22" ry="12" fill="${hc}"/>
+      <!-- Eyes -->
+      <ellipse cx="32" cy="36" rx="3" ry="3.5" fill="white"/>
+      <ellipse cx="48" cy="36" rx="3" ry="3.5" fill="white"/>
+      <circle cx="33" cy="37" r="2" fill="#2a1a08"/>
+      <circle cx="49" cy="37" r="2" fill="#2a1a08"/>
+      <circle cx="33.8" cy="36.2" r="0.6" fill="white"/>
+      <circle cx="49.8" cy="36.2" r="0.6" fill="white"/>
+      <!-- Eyebrows -->
+      <path d="M28 30 Q32 27 36 29" stroke="${hc}" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M44 29 Q48 27 52 30" stroke="${hc}" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <!-- Nose -->
+      <path d="M40 40 Q38 44 40 46 Q42 44 40 40" fill="${sc}" stroke="rgba(0,0,0,0.2)" stroke-width="0.5"/>
+      <!-- Smile -->
+      <path d="M33 52 Q40 57 47 52" stroke="rgba(0,0,0,0.3)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <!-- Glasses -->
+      <circle cx="32" cy="36" r="5.5" fill="none" stroke="#3a2a10" stroke-width="1.2"/>
+      <circle cx="48" cy="36" r="5.5" fill="none" stroke="#3a2a10" stroke-width="1.2"/>
+      <line x1="37.5" y1="36" x2="42.5" y2="36" stroke="#3a2a10" stroke-width="1.2"/>
+    </svg>
+  `;
+}
+
+// ============================================================
+// UPDATE APPROVAL BARS
+// ============================================================
+function updateBars(animate, studentDelta, staffDelta, eventX, eventY) {
+  if (animate && studentDelta !== undefined) {
+    state.studentApproval = Math.max(0, Math.min(100, state.studentApproval + studentDelta));
+    state.staffApproval = Math.max(0, Math.min(100, state.staffApproval + staffDelta));
+    spawnEmojiFloaters(studentDelta, staffDelta, eventX, eventY);
+  }
+
+  document.getElementById('student-bar').style.width = state.studentApproval + '%';
+  document.getElementById('staff-bar').style.width = state.staffApproval + '%';
+  document.getElementById('student-pct').textContent = state.studentApproval + '%';
+  document.getElementById('staff-pct').textContent = state.staffApproval + '%';
+
+  // ── Three.js: tilt principal based on approval delta ──
+  if (window.ThreeDScene) {
+    window.ThreeDScene.updateApprovalViz(state.studentApproval, state.staffApproval);
+  }
+}
+
+function spawnEmojiFloaters(studentDelta, staffDelta, ex, ey) {
+  const spawnAt = (delta, baseX) => {
+    const emoji = delta >= 0 ? '😊' : '😟';
+    const count = Math.max(1, Math.floor(Math.abs(delta) / 3));
+    for (let i = 0; i < count; i++) {
+      setTimeout(() => {
+        const el = document.createElement('div');
+        el.className = 'emoji-floater';
+        el.textContent = emoji;
+        el.style.left = (baseX + (Math.random() * 60 - 30)) + 'px';
+        el.style.top = (ey || 200) + 'px';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 1300);
+      }, i * 80);
+    }
+  };
+  const hudRect = document.getElementById('approval-hud').getBoundingClientRect();
+  spawnAt(studentDelta, window.innerWidth * 0.25);
+  spawnAt(staffDelta, window.innerWidth * 0.75);
+}
+
+// ============================================================
+// UPDATE COUNTER
+// ============================================================
+function updateCounter() {
+  const el = document.getElementById('question-counter-display');
+  el.textContent = `Decision ${state.currentQuestion + 1} of ${state.totalQuestions}`;
+}
+
+// ============================================================
+// SHOW QUESTION 1 - UNIFORMS
+// ============================================================
+function showQuestion1() {
+  state.currentQuestion = 0;
+  updateCounter();
+  const area = document.getElementById('game-card-area');
+  area.innerHTML = `
+    <div class="decision-card">
+      <div class="card-stamp">Policy Decision #1</div>
+      <div class="card-lines">
+        <div class="question-text">Will students be required to wear a school uniform?</div>
+      </div>
+      <div class="options-row">
+        <div class="option-btn normal" onclick="handleUniformChoice(true)">✅ Yes — Uniforms Required</div>
+        <div class="option-btn chaotic" onclick="handleUniformChoice(false)">🙅 No — Dress Freely</div>
+      </div>
+    </div>
+  `;
+}
+
+function handleUniformChoice(required) {
+  if (required) {
+    showUniformPicker();
+  } else {
+    state.uniformType = 'Normal Clothes';
+    state.decisions.push({ q: 'Uniforms required?', a: 'No', type: 'normal' });
+    showQuestion2();
+  }
+}
+
+const UNIFORM_POOL = ['Traditional Uniform','Preppy Polos','Smart Casual','Suit and Tie','Business Formal','All-Black Everything','Hawaiian Shirts','Pajamas','Camo Gear'];
+
+function showUniformPicker() {
+  const shuffled = UNIFORM_POOL.sort(() => Math.random() - 0.5).slice(0, 3);
+  const four = [...shuffled, 'Bathing Suits'];
+  const area = document.getElementById('game-card-area');
+  area.innerHTML = `
+    <div class="decision-card" style="max-width:580px;">
+      <div class="card-stamp">Select Uniform Style</div>
+      <div class="card-lines">
+        <div class="question-text" style="font-size:15px;">Choose your school's official uniform:</div>
+      </div>
+      <div class="uniform-grid">
+        ${four.map(u => `<div class="uniform-card" onclick="selectUniform('${u}')">${uniformEmoji(u)} ${u}</div>`).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function uniformEmoji(u) {
+  const map = { 'Traditional Uniform':'🎩','Preppy Polos':'👕','Smart Casual':'👗','Suit and Tie':'👔','Business Formal':'💼','All-Black Everything':'🖤','Hawaiian Shirts':'🌺','Pajamas':'😴','Camo Gear':'🪖','Bathing Suits':'🏖️' };
+  return map[u] || '👕';
+}
+
+function selectUniform(u) {
+  state.uniformType = u;
+  state.decisions.push({ q: 'Uniform type', a: u, type: u === 'Bathing Suits' ? 'chaotic' : 'normal' });
+  const sI = 5; const stI = u === 'Bathing Suits' ? -8 : 3;
+  updateBars(true, sI, stI);
+  showReaction('Students 🎉', `"${u}? This is the best/worst day of my life!"`, 'Staff 😐', `"I see. The ${u} mandate is now in effect."`);
+  setTimeout(() => showQuestion2(), 3200);
+}
+
+// ============================================================
+// SHOW QUESTION 2 - PHONES
+// ============================================================
+function showQuestion2() {
+  state.currentQuestion = 1;
+  updateCounter();
+  const area = document.getElementById('game-card-area');
+  area.innerHTML = `
+    <div class="decision-card">
+      <div class="card-stamp">Policy Decision #2</div>
+      <div class="card-lines">
+        <div class="question-text">Will students be allowed to have phones during school hours?</div>
+      </div>
+      <div class="options-row">
+        <div class="option-btn normal" onclick="handlePhoneChoice(true)">📱 Yes — Phones Allowed</div>
+        <div class="option-btn chaotic" onclick="handlePhoneChoice(false)">🚫 No — Absolute Ban</div>
+      </div>
+    </div>
+  `;
+}
+
+function handlePhoneChoice(allowed) {
+  state.phonesAllowed = allowed;
+  state.decisions.push({ q: 'Phones allowed?', a: allowed ? 'Yes' : 'No', type: allowed ? 'normal' : 'chaotic' });
+  const sR = allowed ? '"PHONES ARE BACK! I can finally text in math!"' : '"They took my phone. I\'ve aged 40 years."';
+  const stR = allowed ? '"Classroom attention may suffer. Noted."' : '"Finally. Now maybe they\'ll make eye contact."';
+  const sI = allowed ? 8 : -10; const stI = allowed ? -5 : 9;
+  updateBars(true, sI, stI);
+  showReaction('Students', sR, 'Staff', stR);
+  setTimeout(() => loadAIQuestions(), 3200);
+}
+
+// ============================================================
+// LOAD AI QUESTIONS
+// ============================================================
+function showLoading(msg) {
+  document.getElementById('game-card-area').innerHTML = `
+    <div class="loading-memo">
+      <span class="spinner">📋</span>
+      <p>${msg}</p>
+      <small>Please hold... reviewing district policy manuals</small>
+    </div>
+  `;
+}
+
+async function loadAIQuestions() {
+  state.currentQuestion = 2;
+  updateCounter();
+  showLoading('Reviewing district policies...');
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-5',
+        max_tokens: 1000,
+        system: `You are a game master for a school principal simulator game. Generate 10 funny, creative school policy decision questions for a principal.
+
+IMPORTANT RULE: For roughly 3 or 4 out of the 10 questions, BOTH options should be funny/absurd — there is no "responsible" choice, just two different flavors of chaos. For the remaining questions, one option is practical/normal and one is chaotic. Label both-funny options as type "chaotic". This variety keeps players on their toes.
+
+Each option needs:
+- Short reaction from STUDENTS perspective (1 sentence, funny/dramatic)
+- Short reaction from STAFF/FACULTY perspective (1 sentence, different tone — more formal or resigned)
+- Impact on student approval: integer between -15 and +15
+- Impact on staff approval: integer between -15 and +15
+
+Some questions may have 4 options — vary this.
+
+Return ONLY valid JSON, no markdown, no explanation. Format:
+[{"question":"...","options":[{"text":"...","type":"normal","studentReaction":"...","staffReaction":"...","studentImpact":5,"staffImpact":3},{"text":"...","type":"chaotic","studentReaction":"...","staffReaction":"...","studentImpact":-8,"staffImpact":-5}]}]
+
+Make the chaotic options genuinely funny — specific, absurd, and unexpected. Topics can include: lunch rules, hall passes, detention, dress code, recess, homework, grading, bathroom breaks, school mascot, cafeteria food, school song, lockers, parking, field trips, assemblies, etc.`,
+        messages: [{ role: 'user', content: 'Generate 10 school policy decision questions for a principal simulator game. For about 3-4 of them, make BOTH options absurdly funny with no sane choice. Vary between 2-option and 4-option questions.' }]
+      })
+    });
+    const data = await resp.json();
+    const text = data.content.map(b => b.text || '').join('');
+    let cleaned = text.replace(/```json|```/g,'').trim();
+    // find JSON array
+    const start = cleaned.indexOf('['); const end = cleaned.lastIndexOf(']');
+    if (start !== -1 && end !== -1) cleaned = cleaned.slice(start, end + 1);
+    state.questions = JSON.parse(cleaned);
+    if (!Array.isArray(state.questions) || state.questions.length < 5) throw new Error('bad data');
+  } catch(e) {
+    console.warn('API failed, using fallback:', e);
+    state.questions = FALLBACK_QUESTIONS;
+  }
+
+  showNextAIQuestion();
+}
+
+// ============================================================
+// AI QUESTIONS LOOP
+// ============================================================
+function showNextAIQuestion() {
+  const idx = state.currentQuestion - 2; // 0-indexed into questions array
+  if (idx >= state.questions.length || state.currentQuestion >= state.totalQuestions) {
+    loadStudentScenario();
+    return;
+  }
+  updateCounter();
+  const q = state.questions[idx];
+  const area = document.getElementById('game-card-area');
+  const cardNum = state.currentQuestion + 1;
+  area.innerHTML = `
+    <div class="decision-card">
+      <div class="card-stamp">Policy Decision #${cardNum}</div>
+      <div class="card-lines">
+        <div class="question-text">${q.question}</div>
+      </div>
+      <div class="options-row">
+        ${q.options.map((opt, i) => `
+          <div class="option-btn ${opt.type}" onclick="handleAIChoice(${idx}, ${i})" style="transform:rotate(${i % 2 === 0 ? '0.3' : '-0.3'}deg)">
+            ${opt.type === 'chaotic' ? '🔥 ' : '✅ '}${opt.text}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function handleAIChoice(questionIdx, optionIdx) {
+  const q = state.questions[questionIdx];
+  const opt = q.options[optionIdx];
+  state.decisions.push({ q: q.question, a: opt.text, type: opt.type });
+
+  const rect = document.getElementById('game-card-area').getBoundingClientRect();
+  updateBars(true, opt.studentImpact, opt.staffImpact, rect.left + rect.width/2, rect.top);
+  showReaction('Students', `"${opt.studentReaction}"`, 'Staff', `"${opt.staffReaction}"`);
+
+  state.currentQuestion++;
+  setTimeout(() => showNextAIQuestion(), 3200);
+}
+
+// ============================================================
+// REACTION PANEL  — display only, no side-effects on bars
+// ============================================================
+let reactionTimer = null;
+function showReaction(sLabel, sText, stLabel, stText) {
+  const panel = document.getElementById('reaction-panel');
+  document.getElementById('student-reaction-text').textContent = sText;
+  document.getElementById('staff-reaction-text').textContent = stText;
+  panel.classList.remove('hidden');
+  panel.style.animation = 'none'; panel.offsetHeight; panel.style.animation = '';
+
+  if (reactionTimer) clearTimeout(reactionTimer);
+  reactionTimer = setTimeout(() => panel.classList.add('hidden'), 3000);
+  panel.onclick = () => { panel.classList.add('hidden'); if(reactionTimer) clearTimeout(reactionTimer); };
+}
+
+// ============================================================
+// PHASE 3 - STUDENT IN OFFICE
+// ============================================================
+async function loadStudentScenario() {
+  document.getElementById('phase-game').classList.add('hidden');
+  document.getElementById('question-counter-display').classList.add('hidden');
+
+  const leftArea = document.getElementById('student-decision-area');
+  leftArea.innerHTML = `
+    <div class="loading-memo">
+      <span class="spinner">🚨</span>
+      <p>A student has been sent<br>to your office...</p>
+      <small>Reviewing incident report</small>
+    </div>
+  `;
+
+  document.getElementById('phase-student').classList.remove('hidden');
+
+  let studentData = FALLBACK_STUDENT;
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-5',
+        max_tokens: 1000,
+        system: `You are generating a student-in-the-office scenario for a school principal game. Generate a funny student name, a short funny reason they were sent to the office, and two decision options. Return ONLY valid JSON:
+{"studentName":"...","situation":"...","options":[{"text":"...","type":"normal","studentReaction":"...","staffReaction":"...","studentImpact":5,"staffImpact":3},{"text":"...","type":"chaotic","studentReaction":"...","staffReaction":"...","studentImpact":-10,"staffImpact":-8}]}`,
+        messages: [{ role: 'user', content: 'Generate a funny student office visit scenario for a school principal simulator.' }]
+      })
+    });
+    const data = await resp.json();
+    const text = data.content.map(b => b.text || '').join('');
+    let cleaned = text.replace(/```json|```/g,'').trim();
+    const s = cleaned.indexOf('{'); const e = cleaned.lastIndexOf('}');
+    if (s !== -1 && e !== -1) cleaned = cleaned.slice(s, e+1);
+    studentData = JSON.parse(cleaned);
+  } catch(e) {
+    console.warn('Student API failed:', e);
+  }
+
+  renderStudentScene(studentData);
+}
+
+function renderStudentScene(data) {
+  const leftArea = document.getElementById('student-decision-area');
+  leftArea.innerHTML = `
+    <div class="decision-card" style="max-width:480px; transform:rotate(-0.3deg);">
+      <div class="card-stamp" style="background:#7B1FA2;">🚨 Student Incident</div>
+      <div class="card-lines">
+        <div class="question-text" style="font-size:15px; margin-bottom:8px; color:#7B1FA2;">Student: ${data.studentName}</div>
+        <p style="font-size:14px; color:#333; margin-bottom:20px; font-style:italic;">${data.situation}</p>
+        <div class="question-text" style="font-size:16px;">How do you handle this?</div>
+      </div>
+      <div class="options-row">
+        ${data.options.map((opt, i) => `
+          <div class="option-btn ${opt.type}" onclick="handleStudentChoice(${i}, '${encodeURIComponent(JSON.stringify(data))}')" style="min-width:180px;">
+            ${opt.type === 'chaotic' ? '🔥 ' : '⚖️ '}${opt.text}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  // Render student SVGs
+  const svgArea = document.getElementById('student-svg-area');
+  document.getElementById('student-name-tag').textContent = data.studentName;
+
+  const races = ['#FDDBB4','#C68642','#4A2912','#E8B88A','#8D5524'];
+  const genders = ['boy','girl','boy','girl','boy'];
+  const bodyTypes = ['normal','skinny','fat','normal','normal'];
+  const rotations = [-15, -7, 0, 7, 15];
+  const positions = ['-60px','0px','20px','0px','60px'];
+
+  let svgHTML = '';
+  for (let i = 0; i < 5; i++) {
+    const sc = races[i];
+    const gender = genders[i];
+    const body = bodyTypes[i];
+    svgHTML += `
+      <div style="position:relative; transform:rotate(${rotations[i]}deg); transform-origin: bottom center; z-index:${5-Math.abs(i-2)}; margin-left:${i===0?0:-30}px;">
+        ${renderStudentSVG(sc, gender, body, state.uniformType)}
+      </div>
+    `;
+  }
+
+  // Insert SVGs before name tag
+  const existingTag = document.getElementById('student-name-tag');
+  existingTag.insertAdjacentHTML('beforebegin', svgHTML);
+
+  // ── Three.js: render 3-D student lineup in office scene ──
+  if (window.ThreeDScene) {
+    const students3d = races.map((skinColor, i) => ({
+      skinColor,
+      gender: genders[i],
+      bodyType: bodyTypes[i],
+      outfitType: state.uniformType
+    }));
+    window.ThreeDScene.renderStudentLineup(students3d);
+  }
+}
+
+function handleStudentChoice(optIdx, encodedData) {
+  const data = JSON.parse(decodeURIComponent(encodedData));
+  const opt = data.options[optIdx];
+  state.decisions.push({ q: 'Student incident: ' + data.studentName, a: opt.text, type: opt.type });
+  updateBars(true, opt.studentImpact, opt.staffImpact);
+  showReaction('Students', `"${opt.studentReaction}"`, 'Staff', `"${opt.staffReaction}"`);
+  setTimeout(() => showEndScreen(), 3500);
+}
+
+// ============================================================
+// STUDENT SVG RENDERER
+// ============================================================
+function renderStudentSVG(skinColor, gender, bodyType, uniform) {
+  const bw = bodyType === 'skinny' ? 32 : bodyType === 'fat' ? 52 : bodyType === 'obese' ? 64 : 42;
+  const bh = bodyType === 'skinny' ? 60 : bodyType === 'fat' ? 55 : bodyType === 'obese' ? 52 : 58;
+  const totalH = 130; const totalW = Math.max(80, bw + 20);
+  const cx = totalW / 2;
+
+  // Outfit colors
+  const outfitColors = {
+    'Traditional Uniform': { top: '#1a2a3a', bottom: '#0d1a2a', tie: '#8b1a1a' },
+    'Preppy Polos': { top: '#1a5a8b', bottom: '#c8a048' },
+    'Smart Casual': { top: '#8b5a1a', bottom: '#4a6a3a' },
+    'Suit and Tie': { top: '#1a1a2a', bottom: '#0a0a1a', tie: '#8b0000' },
+    'Business Formal': { top: '#2a2a3a', bottom: '#1a1a2a' },
+    'All-Black Everything': { top: '#111', bottom: '#111' },
+    'Hawaiian Shirts': { top: '#c83070', bottom: '#4a7a3a' },
+    'Pajamas': { top: '#b05090', bottom: '#9040a0' },
+    'Camo Gear': { top: '#4a5a3a', bottom: '#3a4a2a' },
+    'Bathing Suits': { top: '#1a90d0', bottom: '#1a90d0' },
+    'Normal Clothes': { top: '#3a6aaa', bottom: '#2a3a6a' }
+  };
+  const colors = outfitColors[uniform] || outfitColors['Normal Clothes'];
+
+  // Hair based on gender (simple variation)
+  const hairY = gender === 'girl' ? 15 : 18;
+  const hairRY = gender === 'girl' ? 14 : 10;
+  const hairColors = ['#1a1a1a','#3b1f0d','#8B5E3C','#D4A017','#9E9E9E'];
+  const hc = hairColors[Math.floor(Math.random() * hairColors.length)];
+
+  const bodyY = 75; const bodyX = cx - bw/2;
+
+  let extra = '';
+  if (uniform === 'Bathing Suits') extra = `<text x="${cx}" y="118" text-anchor="middle" font-size="14">🤿</text>`;
+  if (colors.tie) extra += `<polygon points="${cx},${bodyY+2} ${cx-4},${bodyY+16} ${cx},${bodyY+20} ${cx+4},${bodyY+16}" fill="${colors.tie}"/>`;
+
+  return `
+    <svg width="${totalW}" height="${totalH}" viewBox="0 0 ${totalW} ${totalH}" xmlns="http://www.w3.org/2000/svg">
+      <!-- Body -->
+      <rect x="${bodyX}" y="${bodyY}" width="${bw}" height="${bh}" rx="6" fill="${colors.top}"/>
+      <!-- Legs -->
+      <rect x="${bodyX+4}" y="${bodyY+bh-4}" width="${bw/2-6}" height="30" rx="4" fill="${colors.bottom}"/>
+      <rect x="${bodyX+bw/2+2}" y="${bodyY+bh-4}" width="${bw/2-6}" height="30" rx="4" fill="${colors.bottom}"/>
+      <!-- Neck -->
+      <rect x="${cx-7}" y="${bodyY-10}" width="14" height="14" rx="4" fill="${skinColor}"/>
+      <!-- Head -->
+      <ellipse cx="${cx}" cy="${bodyY-22}" rx="20" ry="22" fill="${skinColor}"/>
+      <!-- Hair -->
+      <ellipse cx="${cx}" cy="${bodyY - 22 - hairY}" rx="20" ry="${hairRY}" fill="${hc}"/>
+      ${gender === 'girl' ? `<ellipse cx="${cx-18}" cy="${bodyY-18}" rx="6" ry="14" fill="${hc}"/><ellipse cx="${cx+18}" cy="${bodyY-18}" rx="6" ry="14" fill="${hc}"/>` : ''}
+      <!-- Eyes -->
+      <circle cx="${cx-7}" cy="${bodyY-24}" r="3" fill="white"/>
+      <circle cx="${cx+7}" cy="${bodyY-24}" r="3" fill="white"/>
+      <circle cx="${cx-6.5}" cy="${bodyY-24}" r="1.8" fill="#2a1a08"/>
+      <circle cx="${cx+7.5}" cy="${bodyY-24}" r="1.8" fill="#2a1a08"/>
+      <!-- Smile -->
+      <path d="M${cx-6} ${bodyY-14} Q${cx} ${bodyY-10} ${cx+6} ${bodyY-14}" stroke="rgba(0,0,0,0.4)" stroke-width="1.5" fill="none"/>
+      ${extra}
+    </svg>
+  `;
+}
+
+// ============================================================
+// PHASE 4 - END SCREEN
+// ============================================================
+async function showEndScreen() {
+  document.getElementById('phase-student').classList.add('hidden');
+  document.getElementById('reaction-panel').classList.add('hidden');
+
+  const avg = Math.round((state.studentApproval + state.staffApproval) / 2);
+  let tier, tierEmoji;
+  if (avg >= 80) { tier = 'Beloved Principal of the Century'; tierEmoji = '🏆'; }
+  else if (avg >= 60) { tier = 'Pretty Solid Administrator'; tierEmoji = '👍'; }
+  else if (avg >= 40) { tier = 'Controversial but Memorable'; tierEmoji = '🤷'; }
+  else if (avg >= 20) { tier = 'Already Under Investigation'; tierEmoji = '🚨'; }
+  else { tier = 'Recalled by the School Board'; tierEmoji = '💀'; }
+
+  const fallbackQuotes = [
+    `${state.title} ${state.lastName}'s reign at ${state.schoolName} will be remembered for decades — mostly in therapy sessions.`,
+    `Future historians will debate whether ${state.title} ${state.lastName} was a visionary or a chaos agent. The answer is both.`,
+    `${state.schoolName} was never the same after ${state.title} ${state.lastName} arrived. The insurance premiums say it all.`,
+    `${state.title} ${state.lastName} turned ${state.schoolName} into a place where anything was possible — including things that definitely should not have been possible.`
+  ];
+
+  const rc = document.getElementById('report-card-content');
+  rc.innerHTML = `
+    <div class="report-title">Official Legacy Report</div>
+    <div class="report-subtitle">End of Term Evaluation • ${state.schoolName}</div>
+
+    <div class="report-row">
+      <span>Principal</span>
+      <span>${state.title} ${state.lastName}</span>
+    </div>
+    <div class="report-row">
+      <span>School</span>
+      <span>${state.schoolName}</span>
+    </div>
+    <div class="report-row">
+      <span>Uniform Policy</span>
+      <span>${state.uniformType}</span>
+    </div>
+    <div class="report-row">
+      <span>Phone Policy</span>
+      <span>${state.phonesAllowed ? '📱 Allowed' : '🚫 Banned'}</span>
+    </div>
+    <div class="report-row">
+      <span>Student Approval</span>
+      <span style="color:var(--student-bar)">${state.studentApproval}%</span>
+    </div>
+    <div class="report-row">
+      <span>Staff Approval</span>
+      <span style="color:var(--staff-bar)">${state.staffApproval}%</span>
+    </div>
+    <div class="report-row">
+      <span>Overall Rating</span>
+      <span style="color:var(--gold)">${avg}%</span>
+    </div>
+
+    <div class="legacy-tier">
+      <div style="font-size:36px;margin-bottom:4px;">${tierEmoji}</div>
+      <div class="legacy-tier-text">${tier}</div>
+    </div>
+
+    <div class="legacy-quote" id="legacy-quote-text">
+      <em>${fallbackQuotes[Math.floor(Math.random() * fallbackQuotes.length)]}</em>
+    </div>
+
+    <div onclick="resetGame()" class="play-again-btn">🔄 New Appointment</div>
+  `;
+
+  document.getElementById('phase-end').classList.remove('hidden');
+
+  // Try AI quote
+  try {
+    const decisionsStr = state.decisions.slice(0, 6).map(d => `${d.q}: ${d.a}`).join('; ');
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-5',
+        max_tokens: 200,
+        system: 'Write a funny 2-sentence legacy quote for a school principal. Keep it satirical and slightly absurd. Return only the 2 sentences, no quotes or labels.',
+        messages: [{ role: 'user', content: `Principal: ${state.title} ${state.lastName} at ${state.schoolName}. Key decisions: ${decisionsStr}. Student approval: ${state.studentApproval}%, Staff approval: ${state.staffApproval}%.` }]
+      })
+    });
+    const data = await resp.json();
+    const quote = data.content.map(b => b.text || '').join('').trim();
+    if (quote.length > 20) {
+      document.getElementById('legacy-quote-text').innerHTML = `<em>${quote}</em>`;
+    }
+  } catch(e) { /* keep fallback */ }
+}
+
+// ============================================================
+// RESET
+// ============================================================
+function resetGame() {
+  Object.assign(state, {
+    title: 'Mr.', lastName: '', schoolName: '',
+    skinColor: '#FDDBB4', hairColor: '#1a1a1a',
+    studentApproval: 20, staffApproval: 50,
+    uniformType: 'Normal Clothes', phonesAllowed: true,
+    questions: [], currentQuestion: 0,
+    totalQuestions: 12, phase: 'setup', decisions: []
+  });
+
+  document.getElementById('phase-end').classList.add('hidden');
+  document.getElementById('phase-student').classList.add('hidden');
+  document.getElementById('phase-game').classList.add('hidden');
+  document.getElementById('office-bg').style.display = 'none';
+  document.getElementById('approval-hud').classList.add('hidden');
+  document.getElementById('question-counter-display').classList.add('hidden');
+  document.getElementById('reaction-panel').classList.add('hidden');
+  document.getElementById('nameplate-area').classList.add('hidden');
+  document.getElementById('phase-setup').classList.remove('hidden');
+
+  document.getElementById('lastname-input').value = '';
+  document.getElementById('school-input').value = '';
+
+  // ── Three.js: tear down scene so it re-initialises cleanly on next play ──
+  if (window.ThreeDScene) window.ThreeDScene.destroyScene();
+
+  updateBars(false);
+}
+</script>
+</body>
+</html>
